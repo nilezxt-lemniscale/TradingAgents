@@ -1,3 +1,4 @@
+import os
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
@@ -8,6 +9,7 @@ load_dotenv()
 
 # Create a custom config
 config = DEFAULT_CONFIG.copy()
+config["api_key"] = os.getenv("DASHSCOPE_API_KEY")
 config["deep_think_llm"] = "qwen-plus"  # Use a different model
 config["quick_think_llm"] = "qwen-plus"  # Use a different model
 config["max_debate_rounds"] = 1  # Increase debate rounds

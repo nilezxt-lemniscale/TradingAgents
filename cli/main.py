@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 import datetime
 import typer
@@ -739,7 +740,7 @@ def run_analysis():
     # First get all user selections
     selections = get_user_selections()
 
-    # Create config with selected research depth
+    # Create config from selections
     config = DEFAULT_CONFIG.copy()
     config["max_debate_rounds"] = selections["research_depth"]
     config["max_risk_discuss_rounds"] = selections["research_depth"]
@@ -747,6 +748,24 @@ def run_analysis():
     config["deep_think_llm"] = selections["deep_thinker"]
     config["backend_url"] = selections["backend_url"]
     config["llm_provider"] = selections["llm_provider"].lower()
+
+    # Dynamically load the API key based on the selected provider
+    provider = config["llm_provider"]
+    api_key = None
+    if provider == "qwen":
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+    elif provider == "openai" or provider == "openrouter":
+        api_key = os.getenv("OPENAI_API_KEY")
+    elif provider == "google":
+        api_key = os.getenv("GOOGLE_API_KEY")
+    elif provider == "anthropic":
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+    
+    # For local models like Ollama, api_key can be a non-empty string
+    if not api_key and provider == "ollama":
+        api_key = "ollama" # Placeholder, as the client may require a non-null key
+
+    config['api_key'] = api_key
 
     # Initialize the graph
     graph = TradingAgentsGraph(
